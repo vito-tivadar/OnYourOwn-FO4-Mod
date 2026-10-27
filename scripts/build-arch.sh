@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Linux cross-build of the Windows DLL (clang-cl + lld-link with Microsoft's CRT/SDK from xwin).
 # Run scripts/setup-toolchain.sh --accept-license once first.
-# Output: dist/OnYourOwn.zip (Data-relative layout for mod managers).
+# Output: dist/OnYourOwn-<version>.zip (Data-relative layout for mod managers).
 set -euo pipefail
 
 repo_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -41,6 +41,4 @@ mkdir -p "$XMAKE_GLOBALDIR" "$XMAKE_CONFIGDIR"
 xmake f -p mingw -a x64 -m release --toolchain=oyo-msvc --runtimes=MD --ar="$repo_dir/toolchains/bin/link" -y
 xmake build OnYourOwn
 
-mkdir -p dist
-python3 scripts/package.py build/mingw/x64/release/OnYourOwn.dll dist/OnYourOwn.zip --data-root Data
-echo "Ready: dist/OnYourOwn.zip"
+python3 scripts/package.py build/mingw/x64/release/OnYourOwn.dll dist --data-root Data

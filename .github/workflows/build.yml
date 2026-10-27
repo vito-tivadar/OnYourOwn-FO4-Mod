@@ -29,11 +29,12 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: OnYourOwn
-          path: dist/OnYourOwn.zip
+          path: dist/OnYourOwn-*.zip
+          if-no-files-found: error
 
       - name: Draft release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
           draft: true
-          files: dist/OnYourOwn.zip
+          files: dist/OnYourOwn-*.zip

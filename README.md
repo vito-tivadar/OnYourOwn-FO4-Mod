@@ -32,7 +32,7 @@ It never edits saves, discovery, quests or fast travel, and it replaces no game 
 
 ## Installation
 
-Install `OnYourOwn.zip` with your mod manager, or copy its contents into the game's `Data` folder:
+Install `OnYourOwn-<version>.zip` with your mod manager, or copy its contents into the game's `Data` folder:
 
 ```
 Data/F4SE/Plugins/OnYourOwn.dll
@@ -69,7 +69,7 @@ Requirements: xmake 3.x, Visual Studio 2022 or its Build Tools with the C++ work
 scripts/build-windows.ps1
 ```
 
-This runs the tests, builds the DLL and writes `dist/OnYourOwn.zip`. Manually:
+This runs the tests, builds the DLL and writes `dist/OnYourOwn-<version>.zip`. Manually:
 
 ```powershell
 xmake f -p windows -a x64 -m release

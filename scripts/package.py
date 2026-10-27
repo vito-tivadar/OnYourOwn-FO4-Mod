@@ -1,18 +1,28 @@
 #!/usr/bin/env python3
 """Package the plugin DLL and its MCM files as a Data-relative ZIP for mod managers.
 
-Usage: package.py <OnYourOwn.dll> <output.zip> [--data-root Data]
+Usage: package.py <OnYourOwn.dll> <output dir> [--data-root Data]
+Writes <output dir>/OnYourOwn-<version>.zip, with the version taken from xmake.lua.
 """
 
 import argparse
 import hashlib
 import json
+import re
 import struct
 import zipfile
 from pathlib import Path
 
 REQUIRED_EXPORTS = {"F4SEPlugin_Load", "F4SEPlugin_Version"}
 MCM_FILES = ("config.json", "settings.ini")
+XMAKE_LUA = Path(__file__).resolve().parent.parent / "xmake.lua"
+
+
+def project_version() -> str:
+    match = re.search(r'^set_version\("([^"]+)"\)', XMAKE_LUA.read_text(), re.MULTILINE)
+    if not match:
+        raise SystemExit(f"no set_version(...) in {XMAKE_LUA}")
+    return match.group(1)
 
 
 def pe_exports(data: bytes) -> set[str]:
@@ -53,7 +63,7 @@ def pe_exports(data: bytes) -> set[str]:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("dll", type=Path)
-    parser.add_argument("zip", type=Path)
+    parser.add_argument("out_dir", type=Path)
     parser.add_argument("--data-root", type=Path, default=Path("Data"), help="folder holding MCM/ (default: ./Data)")
     args = parser.parse_args()
 
@@ -71,18 +81,19 @@ def main() -> None:
     json.loads(files["MCM/Config/OnYourOwn/config.json"])  # fail early on broken JSON
 
     # Fixed timestamps and permissions so the ZIP is reproducible.
-    args.zip.parent.mkdir(parents=True, exist_ok=True)
-    with zipfile.ZipFile(args.zip, "w") as archive:
+    zip_path = args.out_dir / f"OnYourOwn-{project_version()}.zip"
+    args.out_dir.mkdir(parents=True, exist_ok=True)
+    with zipfile.ZipFile(zip_path, "w") as archive:
         for name, data in sorted(files.items()):
             info = zipfile.ZipInfo(name, date_time=(2026, 1, 1, 0, 0, 0))
             info.compress_type = zipfile.ZIP_DEFLATED
             info.external_attr = 0o644 << 16
             archive.writestr(info, data, compresslevel=9)
 
-    with zipfile.ZipFile(args.zip) as archive:
+    with zipfile.ZipFile(zip_path) as archive:
         if archive.namelist() != sorted(files) or any(archive.read(n) != d for n, d in files.items()):
             raise SystemExit("ZIP verification failed")
-    print(f"Created {args.zip} ({', '.join(sorted(files))}; DLL SHA-256 {hashlib.sha256(dll).hexdigest()})")
+    print(f"Created {zip_path} ({', '.join(sorted(files))}; DLL SHA-256 {hashlib.sha256(dll).hexdigest()})")
 
 
 if __name__ == "__main__":

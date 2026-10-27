@@ -1,4 +1,4 @@
-# Native Windows build: runs the host tests, builds OnYourOwn.dll and packages dist/OnYourOwn.zip.
+# Native Windows build: runs the host tests, builds OnYourOwn.dll and packages dist/OnYourOwn-<version>.zip.
 # Requires xmake 3.x, Visual Studio 2022 (C++ workload) or Build Tools, Python 3 and git.
 # Usage: scripts/build-windows.ps1 [-SkipTests]
 param([switch]$SkipTests)
@@ -29,6 +29,4 @@ if (-not $SkipTests) {
 Invoke-Checked xmake f -p windows -a x64 -m release -o build -y
 Invoke-Checked xmake build OnYourOwn
 
-New-Item -ItemType Directory -Force dist | Out-Null
-Invoke-Checked python scripts/package.py build/windows/x64/release/OnYourOwn.dll dist/OnYourOwn.zip --data-root Data
-Write-Host 'Ready: dist/OnYourOwn.zip'
+Invoke-Checked python scripts/package.py build/windows/x64/release/OnYourOwn.dll dist --data-root Data
