@@ -1,0 +1,25 @@
+# Build output and caches
+/build/
+/dist/
+/.xmake/
+/.cache/
+/.vs/
+/.vscode/
+/compile_commands.json
+*.dll
+*.pdb
+*.lib
+*.exp
+*.obj
+*.o
+*.zip
+
+# Local game files, logs and dumps (never commit game assets)
+/game-logs/
+*.log
+*.swf
+*.ba2
+*.bin
+*.dmp
+*.ini.local
+__pycache__/

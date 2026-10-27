@@ -1,0 +1,25 @@
+-- Linux-hosted MSVC-ABI toolchain: clang-cl and lld-link with the Microsoft CRT and Windows SDK
+-- that scripts/setup-toolchain.sh downloads into build/toolchains/ (via xwin).
+toolchain("oyo-msvc")
+    set_kind("standalone")
+
+    on_check(function (toolchain)
+        local root = path.join(os.projectdir(), "build/toolchains/msvc")
+        return os.isdir(path.join(root, "VC/Tools/MSVC/14.44.17.14/include"))
+    end)
+
+    on_load(function (toolchain)
+        local base = path.join(os.projectdir(), "build/toolchains")
+        local root = path.join(base, "msvc")
+        toolchain:set("toolset", "cc", "clang-cl")
+        toolchain:set("toolset", "cxx", "clang-cl")
+        toolchain:set("toolset", "ld", "lld-link")
+        toolchain:set("toolset", "sh", "lld-link")
+        toolchain:set("toolset", "ar", path.join(os.projectdir(), "toolchains/bin/link"))
+        toolchain:set("toolset", "as", "llvm-ml")
+        toolchain:set("toolset", "mrc", "llvm-rc")
+        toolchain:add("cxflags", "/winsysroot", root, { force = true })
+        toolchain:add("shflags", "/libpath:" .. path.join(root, "VC/Tools/MSVC/14.44.17.14/lib/x64"), { force = true })
+        toolchain:add("shflags", "/libpath:" .. path.join(base, "msvc-um-lib"), { force = true })
+        toolchain:add("shflags", "/libpath:" .. path.join(base, "msvc-ucrt-lib"), { force = true })
+    end)

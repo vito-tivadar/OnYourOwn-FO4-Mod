@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# xmake recognizes the MSVC archive command as "link"; CMake invokes this path.
+exec llvm-lib "$@"

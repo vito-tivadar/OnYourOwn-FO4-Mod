@@ -1,0 +1,277 @@
+{
+  "modName": "OnYourOwn",
+  "displayName": "On Your Own",
+  "minMcmVersion": 2,
+  "content": [
+    {
+      "text": "General",
+      "type": "section"
+    },
+    {
+      "id": "bEnabled:General",
+      "text": "Enable On Your Own",
+      "type": "switcher",
+      "help": "Master switch. Off restores the vanilla Pip-Boy map and HUD.",
+      "valueOptions": {
+        "sourceType": "ModSettingBool"
+      }
+    },
+    {
+      "id": "iLogLevel:General",
+      "text": "Diagnostic logging",
+      "type": "dropdown",
+      "help": "What to write to the F4SE log (OnYourOwn.log). Startup, warnings and errors are always logged. Leave on None unless troubleshooting.",
+      "valueOptions": {
+        "sourceType": "ModSettingInt",
+        "options": [
+          "None",
+          "Everything",
+          "Locations",
+          "Quest markers",
+          "Player & quest hiding",
+          "Map zoom & centering",
+          "Compass (HUD)"
+        ]
+      }
+    },
+    {
+      "text": "Settings are on the Locations, Quests, Other Markers and Compass pages. Changes apply when you close this menu.",
+      "type": "text"
+    }
+  ],
+  "pages": [
+    {
+      "pageDisplayName": "Locations",
+      "content": [
+        {
+          "text": "Locations (world map)",
+          "type": "section"
+        },
+        {
+          "id": "bShowUndiscovered:Locations",
+          "text": "Undiscovered locations",
+          "type": "switcher",
+          "help": "Show locations you have not discovered yet.",
+          "valueOptions": {
+            "sourceType": "ModSettingBool"
+          }
+        },
+        {
+          "id": "bShowDiscovered:Locations",
+          "text": "Discovered locations",
+          "type": "switcher",
+          "help": "Show locations you have discovered.",
+          "valueOptions": {
+            "sourceType": "ModSettingBool"
+          }
+        },
+        {
+          "id": "bShowDiscoveredSettlements:Locations",
+          "text": "Discovered settlements",
+          "type": "switcher",
+          "help": "Show settlements you have discovered. Undiscovered settlements are never shown by this option.",
+          "valueOptions": {
+            "sourceType": "ModSettingBool"
+          }
+        }
+      ]
+    },
+    {
+      "pageDisplayName": "Quests",
+      "content": [
+        {
+          "text": "Quest markers (Pip-Boy map)",
+          "type": "section"
+        },
+        {
+          "id": "iQuestObjectives:Quests",
+          "text": "Quest objectives",
+          "type": "dropdown",
+          "help": "Objective markers of main, faction, side and DLC quests (the Pip-Boy quest list).",
+          "valueOptions": {
+            "sourceType": "ModSettingInt",
+            "options": [
+              "Always show",
+              "World map only",
+              "Local map only",
+              "Never show"
+            ]
+          }
+        },
+        {
+          "id": "iMiscObjectives:Quests",
+          "text": "Miscellaneous objectives",
+          "type": "dropdown",
+          "help": "Objective markers of miscellaneous and radiant quests (the Pip-Boy Misc section).",
+          "valueOptions": {
+            "sourceType": "ModSettingInt",
+            "options": [
+              "Always show",
+              "World map only",
+              "Local map only",
+              "Never show"
+            ]
+          }
+        },
+        {
+          "id": "iQuestDoors:Quests",
+          "text": "Quest door markers",
+          "type": "dropdown",
+          "help": "Pip-Boy map: the quest marker shown on a door when the objective is inside or behind it. Not the floating marker in the world.",
+          "valueOptions": {
+            "sourceType": "ModSettingInt",
+            "options": [
+              "Always show",
+              "World map only",
+              "Local map only",
+              "Never show"
+            ]
+          }
+        },
+        {
+          "text": "Quest markers (in the world)",
+          "type": "section"
+        },
+        {
+          "id": "bShowFloatingMarkers:Quests",
+          "text": "Floating quest markers",
+          "type": "switcher",
+          "help": "The quest marker floating over the target (or its door) when you get close. The compass quest markers are on the Compass page.",
+          "valueOptions": {
+            "sourceType": "ModSettingBool"
+          }
+        }
+      ]
+    },
+    {
+      "pageDisplayName": "Other Markers",
+      "content": [
+        {
+          "text": "Other markers",
+          "type": "section"
+        },
+        {
+          "id": "iPlayer:Markers",
+          "text": "Player position",
+          "type": "dropdown",
+          "help": "Your position. When hidden on the world map, it opens fully zoomed out and centered.",
+          "valueOptions": {
+            "sourceType": "ModSettingInt",
+            "options": [
+              "Always show",
+              "World map only",
+              "Local map only",
+              "Never show"
+            ]
+          }
+        },
+        {
+          "id": "iCustomWaypoint:Markers",
+          "text": "Custom waypoint",
+          "type": "dropdown",
+          "help": "The waypoint you place on the map.",
+          "valueOptions": {
+            "sourceType": "ModSettingInt",
+            "options": [
+              "Always show",
+              "World map only",
+              "Local map only",
+              "Never show"
+            ]
+          }
+        },
+        {
+          "id": "iPowerArmor:Markers",
+          "text": "Power armor",
+          "type": "dropdown",
+          "help": "The location of your power armor.",
+          "valueOptions": {
+            "sourceType": "ModSettingInt",
+            "options": [
+              "Always show",
+              "World map only",
+              "Local map only",
+              "Never show"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "pageDisplayName": "Compass",
+      "content": [
+        {
+          "text": "HUD compass",
+          "type": "section"
+        },
+        {
+          "text": "Compass markers and markers floating in the world (floating quest markers are on the Quests page). With every option on, the HUD is left alone. With Immersive HUD (iHUD), let iHUD decide when the compass is shown and use these options to hide specific markers.",
+          "type": "text"
+        },
+        {
+          "id": "bShowCompass:Compass",
+          "text": "Show compass",
+          "type": "switcher",
+          "help": "Off hides the whole compass bar, even when iHUD would show it. Floating markers keep their own options.",
+          "valueOptions": {
+            "sourceType": "ModSettingBool"
+          }
+        },
+        {
+          "id": "bShowQuests:Compass",
+          "text": "Quest markers",
+          "type": "switcher",
+          "help": "Quest objectives and quest doors on the compass. Floating quest markers in the world have their own option on the Quests page.",
+          "valueOptions": {
+            "sourceType": "ModSettingBool"
+          }
+        },
+        {
+          "id": "bShowEnemies:Compass",
+          "text": "Enemies (red dots)",
+          "type": "switcher",
+          "help": "Hostile markers on the compass and over enemies in the world.",
+          "valueOptions": {
+            "sourceType": "ModSettingBool"
+          }
+        },
+        {
+          "id": "bShowUndiscovered:Compass",
+          "text": "Undiscovered locations",
+          "type": "switcher",
+          "help": "Nearby locations you have not discovered yet.",
+          "valueOptions": {
+            "sourceType": "ModSettingBool"
+          }
+        },
+        {
+          "id": "bShowDiscovered:Compass",
+          "text": "Discovered locations",
+          "type": "switcher",
+          "help": "Locations you have discovered.",
+          "valueOptions": {
+            "sourceType": "ModSettingBool"
+          }
+        },
+        {
+          "id": "bShowCustomWaypoint:Compass",
+          "text": "Custom waypoint",
+          "type": "switcher",
+          "help": "The waypoint you place on the map, on the compass and floating in the world.",
+          "valueOptions": {
+            "sourceType": "ModSettingBool"
+          }
+        },
+        {
+          "id": "bShowDirections:Compass",
+          "text": "Directions (N, E, S, W)",
+          "type": "switcher",
+          "help": "The cardinal direction letters.",
+          "valueOptions": {
+            "sourceType": "ModSettingBool"
+          }
+        }
+      ]
+    }
+  ]
+}
