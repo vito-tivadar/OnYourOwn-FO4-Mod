@@ -16,6 +16,9 @@ function Invoke-Checked {
 if (-not (Test-Path 'lib/commonlibf4/xmake.lua')) {
     Invoke-Checked git submodule update --init --recursive
 }
+if (-not (Test-Path 'lib/commonlibf4/xmake.lua')) {
+    throw 'lib/commonlibf4 is missing: the CommonLibF4 submodule is not registered in this repository (git submodule add https://github.com/libxse/commonlibf4.git lib/commonlibf4).'
+}
 
 if (-not $SkipTests) {
     Invoke-Checked xmake f -p windows -a x64 -m debug -o build/host-tests -y
