@@ -41,7 +41,7 @@ if is_plat("windows", "mingw") then
         end
         add_rules("commonlibf4.plugin", {
             name = "OnYourOwn",
-            author = "On Your Own contributors",
+            author = "Vito Tivadar",
             description = "Independent Pip-Boy map and HUD marker visibility"
         })
         add_files(

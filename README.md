@@ -57,7 +57,8 @@ The project uses [xmake](https://xmake.io) and [CommonLibF4](https://github.com/
 (a git submodule). Clone with submodules:
 
 ```sh
-git clone --recursive https://github.com/<user>/on-your-own.git
+git clone --recursive https://github.com/vito-tivadar/OnYourOwn-FO4-Mod.git
+cd OnYourOwn-FO4-Mod
 ```
 
 ### Windows
@@ -106,6 +107,8 @@ data update and filters the markers before the interface draws them, and hides H
 every frame. Contributions are welcome; see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
+
+Copyright (C) 2026 Vito Tivadar.
 
 GPL-3.0 with a modding exception, see [LICENSE](LICENSE) and [EXCEPTIONS](EXCEPTIONS).
 Third-party code: CommonLibF4 (GPL-3.0 with exceptions), spdlog (MIT), and an adapted
