@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.0 (first release)
+## 1.0.0 (first release)
 
 - Pip-Boy world map: undiscovered locations, discovered locations and discovered settlements.
 - Pip-Boy world and local maps: quest objectives, miscellaneous objectives, quest door markers,

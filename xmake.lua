@@ -7,7 +7,7 @@
 
 set_xmakever("3.0.0")
 set_project("OnYourOwn")
-set_version("0.1.0")
+set_version("1.0.0")
 set_license("GPL-3.0")
 set_languages("c++23")
 set_warnings("allextra")
