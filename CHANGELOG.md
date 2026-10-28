@@ -10,3 +10,5 @@
   custom waypoint and N/E/S/W letters.
 - Floating quest markers in the world.
 - MCM menu with diagnostic logging per area.
+- Builds for Fallout 4 1.11.240 (`OnYourOwn-1.0.0.zip`) and old-gen 1.10.163 with F4SE 0.6.23
+  (`OnYourOwn-1.0.0-OldGen.zip`).
