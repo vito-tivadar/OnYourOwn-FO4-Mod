@@ -13,7 +13,10 @@ Read [docs/how-it-works.md](docs/how-it-works.md) first.
 - **Keep game logic testable.** "Should this marker show?" decisions belong in the pure files
   (`MarkerPolicy`, `CompassPolicy`, `MarkerClassifier`, `IniSettings`) with tests in `tests/`.
 - **No SWF replacements.** The mod must work alongside HUD and Pip-Boy mods.
-- Compiling is not testing: say what was checked in game and what was not.
+- **Both game versions.** Every change ships for 1.11.240 and 1.10.163. If the old-gen build
+  fails `scripts/oldgen.py check`, the code uses a game function or global with no 1.10.163
+  Address Library ID yet: add it to `oldgen/ids.tsv` with how it was verified.
+- Compiling is not testing: say what was checked in game and what was not. Test both versions.
 
 ## Adding a setting
 

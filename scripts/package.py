@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Package the plugin DLL and its MCM files as a Data-relative ZIP for mod managers.
 
-Usage: package.py <OnYourOwn.dll> <output dir> [--data-root Data]
-Writes <output dir>/OnYourOwn-<version>.zip, with the version taken from xmake.lua.
+Usage: package.py <OnYourOwn.dll> <output dir> [--data-root Data] [--old-gen]
+Writes <output dir>/OnYourOwn-<version>.zip (or -OldGen.zip), with the version taken from xmake.lua.
 """
 
 import argparse
@@ -14,6 +14,8 @@ import zipfile
 from pathlib import Path
 
 REQUIRED_EXPORTS = {"F4SEPlugin_Load", "F4SEPlugin_Version"}
+OLD_GEN_EXPORTS = {"F4SEPlugin_Query"}  # F4SE 0.6 loads plugins through Query
+NEXT_GEN_RUNTIME, OLD_GEN_RUNTIME = "1.11.240", "1.10.163"  # F4SEPlugin_Version.compatibleVersions[0]
 MCM_FILES = ("config.json", "settings.ini")
 XMAKE_LUA = Path(__file__).resolve().parent.parent / "xmake.lua"
 
@@ -25,8 +27,8 @@ def project_version() -> str:
     return match.group(1)
 
 
-def pe_exports(data: bytes) -> set[str]:
-    """Return the exported function names of a Windows x64 DLL (raises if it is not one)."""
+def pe_exports(data: bytes) -> dict[str, int]:
+    """Return the exports (name -> file offset) of a Windows x64 DLL (raises if it is not one)."""
     if data[:2] != b"MZ":
         raise ValueError("not a PE file")
     pe = struct.unpack_from("<I", data, 0x3C)[0]
@@ -49,15 +51,22 @@ def pe_exports(data: bytes) -> set[str]:
         raise ValueError(f"RVA {rva:#x} is outside all sections")
 
     if export_rva == 0:
-        return set()
+        return {}
     export_dir = offset(export_rva)
-    name_count, = struct.unpack_from("<I", data, export_dir + 24)
-    names_rva, = struct.unpack_from("<I", data, export_dir + 32)
-    names = set()
+    name_count, functions_rva, names_rva, ordinals_rva = struct.unpack_from("<IIII", data, export_dir + 24)
+    exports = {}
     for i in range(name_count):
         start = offset(struct.unpack_from("<I", data, offset(names_rva) + i * 4)[0])
-        names.add(data[start:data.index(b"\0", start)].decode("ascii"))
-    return names
+        ordinal, = struct.unpack_from("<H", data, offset(ordinals_rva) + i * 2)
+        function_rva, = struct.unpack_from("<I", data, offset(functions_rva) + ordinal * 4)
+        exports[data[start:data.index(b"\0", start)].decode("ascii")] = offset(function_rva)
+    return exports
+
+
+def declared_runtime(data: bytes, version_data: int) -> str:
+    """The first game version in F4SEPlugin_Version.compatibleVersions (F4SE::PluginVersionData + 0x210)."""
+    packed, = struct.unpack_from("<I", data, version_data + 0x210)
+    return f"{packed >> 24}.{packed >> 16 & 0xFF}.{packed >> 4 & 0xFFF}"
 
 
 def main() -> None:
@@ -65,12 +74,21 @@ def main() -> None:
     parser.add_argument("dll", type=Path)
     parser.add_argument("out_dir", type=Path)
     parser.add_argument("--data-root", type=Path, default=Path("Data"), help="folder holding MCM/ (default: ./Data)")
+    parser.add_argument("--old-gen", action="store_true", help="DLL built with --oldgen=y (game 1.10.163)")
     args = parser.parse_args()
 
     dll = args.dll.read_bytes()
-    missing = REQUIRED_EXPORTS - pe_exports(dll)
+    exports = pe_exports(dll)
+    missing = REQUIRED_EXPORTS - exports.keys()
+    if args.old_gen:
+        missing |= OLD_GEN_EXPORTS - exports.keys()
+    elif OLD_GEN_EXPORTS & exports.keys():
+        raise SystemExit(f"{args.dll} is an old-gen build; package it with --old-gen")
     if missing:
         raise SystemExit(f"{args.dll} is missing F4SE exports: {sorted(missing)}")
+    runtime = declared_runtime(dll, exports["F4SEPlugin_Version"])
+    if runtime != (OLD_GEN_RUNTIME if args.old_gen else NEXT_GEN_RUNTIME):
+        raise SystemExit(f"{args.dll} declares game {runtime}, mod managers would reject it")
 
     files = {"F4SE/Plugins/OnYourOwn.dll": dll}
     for name in MCM_FILES:
@@ -81,7 +99,7 @@ def main() -> None:
     json.loads(files["MCM/Config/OnYourOwn/config.json"])  # fail early on broken JSON
 
     # Fixed timestamps and permissions so the ZIP is reproducible.
-    zip_path = args.out_dir / f"OnYourOwn-{project_version()}.zip"
+    zip_path = args.out_dir / f"OnYourOwn-{project_version()}{'-OldGen' if args.old_gen else ''}.zip"
     args.out_dir.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(zip_path, "w") as archive:
         for name, data in sorted(files.items()):

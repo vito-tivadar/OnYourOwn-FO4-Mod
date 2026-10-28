@@ -25,14 +25,22 @@ It never edits saves, discovery, quests or fast travel, and it replaces no game 
 
 ## Requirements
 
-- Fallout 4 **1.11.240** (current Steam version)
+- Fallout 4 **1.11.240** (current Steam version) with F4SE 0.7.x, **or**
+  Fallout 4 **1.10.163** (old-gen) with F4SE 0.6.23
 - [F4SE](https://f4se.silverlock.org/) for that runtime
-- [Address Library for F4SE Plugins](https://www.nexusmods.com/fallout4/mods/47327)
+- [Address Library for F4SE Plugins](https://www.nexusmods.com/fallout4/mods/47327) for that runtime
 - [Mod Configuration Menu](https://www.nexusmods.com/fallout4/mods/21497) (needed to change settings)
 
 ## Installation
 
-Install `OnYourOwn-<version>.zip` with your mod manager, or copy its contents into the game's `Data` folder:
+Each release has one ZIP per game version:
+
+| Game version | File |
+|---|---|
+| 1.11.240 (current Steam version) | `OnYourOwn-<version>.zip` |
+| 1.10.163 (old-gen) | `OnYourOwn-<version>-OldGen.zip` |
+
+Install the one for your game with your mod manager, or copy its contents into the game's `Data` folder:
 
 ```
 Data/F4SE/Plugins/OnYourOwn.dll
@@ -48,8 +56,8 @@ Settings are under *Mod Config → On Your Own* and apply when you close the men
   use On Your Own to hide specific markers. "Show compass" off overrides iHUD.
 - **Mods that replace `Pipboy_MapPage.swf` or `HUDMenu.swf`:** usually fine. Clip classes are read at
   runtime, but heavily rebuilt interfaces may not be recognised. Unrecognised markers stay visible.
-- Other runtimes (old-gen 1.10.163, earlier next-gen builds) are not supported. The plugin checks
-  the game's code before hooking and stays inactive if it does not match.
+- Other runtimes (earlier next-gen builds, VR) are not supported. Each DLL loads only on its own
+  game version, checks the game's code before hooking and stays inactive if it does not match.
 
 ## Building
 
@@ -69,12 +77,26 @@ Requirements: xmake 3.x, Visual Studio 2022 or its Build Tools with the C++ work
 scripts/build-windows.ps1
 ```
 
-This runs the tests, builds the DLL and writes `dist/OnYourOwn-<version>.zip`. Manually:
+This runs the tests, builds both DLLs and writes `dist/OnYourOwn-<version>.zip` and
+`dist/OnYourOwn-<version>-OldGen.zip`. Manually:
 
 ```powershell
-xmake f -p windows -a x64 -m release
+xmake f -p windows -a x64 -m release --oldgen=n -o build
+xmake build OnYourOwn
+
+python scripts/oldgen.py headers build/oldgen/ids
+xmake f -p windows -a x64 -m release --oldgen=y -o build/oldgen
 xmake build OnYourOwn
 ```
+
+### Old-gen build
+
+The old-gen DLL is built from the same source. CommonLibF4 targets next-gen, so `--oldgen=y`
+uses copies of its Address Library ID headers in which the next-gen-only IDs are replaced by the
+1.10.163 IDs listed in [oldgen/ids.tsv](oldgen/ids.tsv) (`scripts/oldgen.py headers`), declares
+game 1.10.163 in `F4SEPlugin_Version` (read by mod managers), and adds the `F4SEPlugin_Query`
+entry point F4SE 0.6 needs. `scripts/oldgen.py check` fails the build
+if the DLL uses a next-gen-only ID that is not in that list; find the 1.10.163 ID and add it.
 
 ### Linux (cross-build)
 
@@ -84,7 +106,7 @@ Clang/LLVM (`clang-cl`, `lld-link`, `llvm-lib`, `llvm-ml`, `llvm-rc`), g++, Pyth
 
 ```sh
 scripts/setup-toolchain.sh --accept-license   # once; review Microsoft's license terms first
-scripts/build-arch.sh
+scripts/build-arch.sh                         # both DLLs and ZIPs, like the Windows script
 ```
 
 ### Tests
@@ -92,13 +114,13 @@ scripts/build-arch.sh
 The game-independent logic has host tests that build on any platform:
 
 ```sh
-xmake f -m debug -o build/host-tests
+xmake f -m debug --oldgen=n -o build/host-tests
 xmake build -g tests
 xmake run -g tests
 ```
 
-GitHub Actions builds and tests every push on Windows and attaches the ZIP to a draft release for
-`v*` tags.
+GitHub Actions builds and tests every push on Windows and attaches both ZIPs to a draft release
+for `v*` tags.
 
 ## How it works
 
