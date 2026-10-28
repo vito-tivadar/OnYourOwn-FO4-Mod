@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Linux cross-build of the Windows DLL (clang-cl + lld-link with Microsoft's CRT/SDK from xwin).
 # Run scripts/setup-toolchain.sh --accept-license once first.
-# Output: dist/OnYourOwn-<version>.zip (Data-relative layout for mod managers).
+# Output: dist/OnYourOwn-<version>.zip (game 1.11.240) and dist/OnYourOwn-<version>-OldGen.zip
+# (game 1.10.163), Data-relative layout for mod managers.
 set -euo pipefail
 
 repo_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -38,7 +39,16 @@ export INCLUDE="$sdk_dir/Windows Kits/10/Include/$sdk_version/um;$sdk_dir/Window
 export XMAKE_GLOBALDIR="$repo_dir/build/xmake-global"
 export XMAKE_CONFIGDIR="$repo_dir/build/xmake-config"
 mkdir -p "$XMAKE_GLOBALDIR" "$XMAKE_CONFIGDIR"
-xmake f -p mingw -a x64 -m release --toolchain=oyo-msvc --runtimes=MD --ar="$repo_dir/toolchains/bin/link" -y
-xmake build OnYourOwn
+configure() {
+    xmake f -p mingw -a x64 -m release --toolchain=oyo-msvc --runtimes=MD --ar="$repo_dir/toolchains/bin/link" "$@" -y
+}
 
+configure --oldgen=n -o build
+xmake build OnYourOwn
 python3 scripts/package.py build/mingw/x64/release/OnYourOwn.dll dist --data-root Data
+
+python3 scripts/oldgen.py headers build/oldgen/ids
+configure --oldgen=y -o build/oldgen
+xmake build OnYourOwn
+python3 scripts/oldgen.py check build/oldgen/mingw/x64/release/OnYourOwn.dll
+python3 scripts/package.py build/oldgen/mingw/x64/release/OnYourOwn.dll dist --data-root Data --old-gen

@@ -81,11 +81,12 @@ every frame, so the icon inside it (`FloatingTargetSubClip`) is hidden instead.
 
 The plugin stays inactive, or the affected part disables itself, if any of these fail:
 
-1. The `PipboyMapMenu` vtable slot holds exactly the `UpdateData` address from the Address Library.
-2. `PipboyDataManager::mapData` has the `PipboyMapData` vtable.
-3. The cached map menu and its containing `PipboyMenu` have the expected vtables.
-4. Tree members exist and have the expected type; SWF arrays and members exist.
-5. Any exception disables the part that threw it and leaves the game as it was.
+1. The old-gen DLL loads only on game 1.10.163, the other one only on 1.11.240 (F4SE checks it).
+2. The `PipboyMapMenu` vtable slot holds exactly the `UpdateData` address from the Address Library.
+3. `PipboyDataManager::mapData` has the `PipboyMapData` vtable.
+4. The cached map menu and its containing `PipboyMenu` have the expected vtables.
+5. Tree members exist and have the expected type; SWF arrays and members exist.
+6. Any exception disables the part that threw it and leaves the game as it was.
 
 ## Diagnostics
 

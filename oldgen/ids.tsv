@@ -1,0 +1,39 @@
+# Address Library IDs for the old-gen build (Fallout 4 1.10.163, F4SE 0.6.23).
+#
+# CommonLibF4 targets next-gen and uses IDs above 2,000,000 for code that moved in next-gen; the
+# 1.10.163 Address Library does not have them. scripts/oldgen.py writes RE/IDs.h and
+# RE/IDs_VTABLE.h with these replaced, and fails the old-gen build if the DLL uses an
+# unlisted one. All other IDs the plugin uses (e.g. the Pip-Boy vtables) already are old-gen IDs.
+#
+# Evidence: alandtse = RelocationID(old-gen, next-gen) in github.com/alandtse/CommonLibF4;
+# f4se = same symbol at both offsets in F4SE 0.6.23 and 0.7.9 sources; code = the two
+# Fallout4.exe functions match; xref = old-gen global read by the matching instruction of
+# paired functions; rtti = found through the type's RTTI vtable.
+#
+# next-gen	old-gen	name	evidence
+2192245	1425657	BSSpinLock::lock	alandtse, code
+2225147	287528	PipboyDataGroup::LockDataGroup	code (EnterCriticalSection thunk at +0x60)
+2225148	1165260	PipboyDataGroup::UnlockDataGroup	code (LeaveCriticalSection thunk at +0x60)
+2267872	652767	MemoryManager::Allocate	alandtse, f4se
+2267874	1582181	MemoryManager::Deallocate	alandtse, f4se, code
+2267897	1573164	BSReadWriteLock::lock_read	alandtse, f4se
+2268720	1204430	BSStringPool::Entry::Release	alandtse, f4se
+2268729	507142	BSStringPool::GetEntry_char	alandtse, code (char variant)
+2285791	254218	GFx::Value::GetArraySize	alandtse, f4se, code
+2285881	827659	GFx::Value::GetElement	f4se, code
+2286101	655847	GFx::Value::Invoke	alandtse, f4se
+2286228	244786	GFx::Value::ObjectAddRef	alandtse, f4se
+2286229	856221	GFx::Value::ObjectRelease	alandtse, f4se
+2286475	1286586	GFx::Value::RemoveElements	alandtse, code
+2286589	1360149	GFx::Value::SetMember	alandtse, f4se
+2286786	1276961	GFx::Value::VisitMembers	alandtse, f4se
+2707105	578487	UI::GetMenuMapRWLock	alandtse, f4se, xref
+4471522	343176	MemoryManager::Singleton	alandtse, f4se (g_mainHeap), code
+4494126	1517430	GFx::Value::GetMember	alandtse, f4se
+4796078	1424022	BSTEvent::BSTGlobalEvent::Singleton	alandtse, f4se, xref
+4796314	548587	UI::Singleton	alandtse, f4se, xref
+4796372	1178971	PipboyDataManager::Singleton	xref (6 of 6)
+4796465	422985	TESForm::AllForms	alandtse, xref
+4796476	691815	TESForm::AllFormsMapLock	alandtse, xref
+4801719	1067039	UIAdvanceMenusFunctionCompleteEvent::GetEventSource	alandtse, rtti
+2224074	92696	PipboyMapMenu::UpdateData	code (PipboyMapMenu vtable slot 2)
