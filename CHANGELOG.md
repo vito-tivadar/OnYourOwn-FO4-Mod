@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.0
+
+- Power armor compass: it is a separate HUD menu the mod did not reach, so markers stayed visible
+  there. It now follows the compass options, or its own set with the new *Compass in power armor*
+  dropdown (MCM Compass page).
+
 ## 1.0.0 (first release)
 
 - Pip-Boy world map: undiscovered locations, discovered locations and discovered settlements.

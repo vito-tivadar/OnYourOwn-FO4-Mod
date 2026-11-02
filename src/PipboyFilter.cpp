@@ -805,6 +805,13 @@ namespace OnYourOwn::Pipboy
         Log::Info("settings", "hud: compass={} quests={} enemies={} undiscovered={} discovered={} custom_waypoint={} directions={} floating_quests={}",
             OnOff(c.showCompass), OnOff(c.showQuests), OnOff(c.showEnemies), OnOff(c.showUndiscoveredLocations),
             OnOff(c.showDiscoveredLocations), OnOff(c.showCustomWaypoint), OnOff(c.showDirections), OnOff(c.showFloatingQuests));
+        if (const auto& p = g_config.powerArmorCompass; g_config.powerArmorCustomCompass) {
+            Log::Info("settings", "power armor hud: compass={} quests={} enemies={} undiscovered={} discovered={} custom_waypoint={} directions={}",
+                OnOff(p.showCompass), OnOff(p.showQuests), OnOff(p.showEnemies), OnOff(p.showUndiscoveredLocations),
+                OnOff(p.showDiscoveredLocations), OnOff(p.showCustomWaypoint), OnOff(p.showDirections));
+        } else {
+            Log::Info("settings", "power armor hud: same as compass");
+        }
     }
 
     bool Install()

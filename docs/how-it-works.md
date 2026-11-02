@@ -73,6 +73,11 @@ contain an icon clip labelled `Discovered` or `Undiscovered`. The N/E/S/W letter
 the marker's own alpha, so hidden markers get alpha 0. "Show compass" off sets the whole widget's
 alpha to 0.
 
+**Power armor.** `PowerArmorHUDMenu.swf` is a separate menu with the same compass widget and marker
+classes at `root.CompassWidget_mc`. It is not always open, so `UI::GetMenuOpen` also tells the plugin
+that the player is in power armor. While it is open the *Compass in power armor* settings apply to
+both compass widgets and to floating markers, except floating quest markers, which have one option.
+
 **Floating markers.** The markers drawn over targets in the world are `FloatingTarget` clips (same
 frame labels) under `root.FloatingQuestMarkerBase`. The game fades a `FloatingTarget`'s own alpha
 every frame, so the icon inside it (`FloatingTargetSubClip`) is hidden instead.
@@ -100,5 +105,6 @@ Settings, warnings and errors are always logged.
   `quest_group_unknown` and `failed_to_hide` should not appear.
 - `[compass] compass shown, hidden: ...`: HUD markers hidden per category. `re-shown by the game`
   should not appear (it would mean the game undoes the hiding).
+- `[compass] power armor compass shown, hidden: ...`: the same, while the power armor HUD is open.
 - `[compass] on compass: ...` / `in world: ...`: which markers exist. `unknown (class ..., frame ...)`
   points at a marker type the mod does not know yet.

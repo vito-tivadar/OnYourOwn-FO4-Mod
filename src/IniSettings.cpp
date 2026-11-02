@@ -39,7 +39,7 @@ namespace OnYourOwn
         }
 
         // Section/key names must match Data/MCM/Config/OnYourOwn/config.json ids ("key:Section").
-        constexpr std::array<Binding, 19> kBindings{ {
+        constexpr std::array<Binding, 27> kBindings{ {
             Flag("General", "bEnabled", [](Config& c) -> bool& { return c.enabled; }),
             Log("General", "iLogLevel", [](Config& c) -> LogLevel& { return c.logLevel; }),
 
@@ -63,6 +63,16 @@ namespace OnYourOwn
             Flag("Compass", "bShowDiscovered", [](Config& c) -> bool& { return c.compass.showDiscoveredLocations; }),
             Flag("Compass", "bShowCustomWaypoint", [](Config& c) -> bool& { return c.compass.showCustomWaypoint; }),
             Flag("Compass", "bShowDirections", [](Config& c) -> bool& { return c.compass.showDirections; }),
+
+            // iCompass is a two-entry MCM dropdown: 0 = same as compass, 1 = custom.
+            Flag("PowerArmor", "iCompass", [](Config& c) -> bool& { return c.powerArmorCustomCompass; }),
+            Flag("PowerArmor", "bShowCompass", [](Config& c) -> bool& { return c.powerArmorCompass.showCompass; }),
+            Flag("PowerArmor", "bShowQuests", [](Config& c) -> bool& { return c.powerArmorCompass.showQuests; }),
+            Flag("PowerArmor", "bShowEnemies", [](Config& c) -> bool& { return c.powerArmorCompass.showEnemies; }),
+            Flag("PowerArmor", "bShowUndiscovered", [](Config& c) -> bool& { return c.powerArmorCompass.showUndiscoveredLocations; }),
+            Flag("PowerArmor", "bShowDiscovered", [](Config& c) -> bool& { return c.powerArmorCompass.showDiscoveredLocations; }),
+            Flag("PowerArmor", "bShowCustomWaypoint", [](Config& c) -> bool& { return c.powerArmorCompass.showCustomWaypoint; }),
+            Flag("PowerArmor", "bShowDirections", [](Config& c) -> bool& { return c.powerArmorCompass.showDirections; }),
         } };
 
         std::string_view Trim(std::string_view s)

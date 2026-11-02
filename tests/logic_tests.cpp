@@ -218,6 +218,33 @@ int main()
         CHECK(cfg.markers.showDiscoveredLocations);  // map setting untouched
 
         // floating markers: quests have their own switch, the rest follow the compass
+        {
+            std::istringstream in("[PowerArmor]\niCompass=1\nbShowCompass=0\nbShowQuests=1\nbShowEnemies=1\nbShowUndiscovered=1\nbShowDiscovered=0\nbShowCustomWaypoint=0\nbShowDirections=0\n");
+            Config             cfg{};
+            ApplyIni(in, cfg);
+            CHECK(cfg.compass == CompassSettings{});  // the regular compass is untouched
+            CHECK(cfg.powerArmorCustomCompass);
+            const auto& p = cfg.powerArmorCompass;
+            CHECK(!p.showCompass && p.showQuests && p.showEnemies && p.showUndiscoveredLocations);
+            CHECK(!p.showDiscoveredLocations && !p.showCustomWaypoint && !p.showDirections);
+
+            // outside power armor the regular settings apply, whatever the dropdown says
+            CHECK(cfg.ActiveCompass(false) == cfg.compass);
+            cfg.compass.showFloatingQuests = true;
+            cfg.powerArmorCompass.showFloatingQuests = false;
+            const auto custom = cfg.ActiveCompass(true);
+            CHECK(!custom.showCompass && custom.showQuests);
+            CHECK(custom.showFloatingQuests);  // one option, on the Quests page
+
+            cfg.powerArmorCustomCompass = false;
+            CHECK(cfg.ActiveCompass(true) == cfg.compass);
+
+            std::istringstream back("[PowerArmor]\niCompass=0\n");
+            cfg.powerArmorCustomCompass = true;
+            ApplyIni(back, cfg);
+            CHECK(!cfg.powerArmorCustomCompass);
+        }
+
         CompassSettings f = all;
         f.showQuests = false;
         CHECK(ShouldShowFloatingMarker(K::Quest, std::nullopt, f));

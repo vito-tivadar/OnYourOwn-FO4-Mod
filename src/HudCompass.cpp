@@ -26,6 +26,9 @@
 //  * Floating markers: FloatingTarget clips under root.FloatingQuestMarkerBase. The game fades
 //    their own alpha every frame, so the icon inside (FloatingTargetSubClip) is hidden instead.
 //
+//  * Power armor: PowerArmorHUDMenu.swf is a separate menu, open only in power armor, with the
+//    same compass widget at root.CompassWidget_mc. Floating markers stay in HUDMenu.
+//
 // Only clips we hid are ever restored, and with every option on nothing is touched, so iHUD and
 // similar mods keep full control.
 
@@ -36,6 +39,7 @@ namespace OnYourOwn::Compass
         using GValue = ::Scaleform::GFx::Value;
 
         constexpr int                        kMaxChildren = 256;
+        constexpr const char*                kPowerArmorMenu = "PowerArmorHUDMenu";
         constexpr std::array<const char*, 2> kHolders{ "QuestMarkerHolder_mc", "OtherMarkerHolder_mc" };
 
         // ---- Scaleform helpers ------------------------------------------------
@@ -112,16 +116,22 @@ namespace OnYourOwn::Compass
             return false;
         }
 
-        bool FindRoot(GValue& a_root, std::string& a_error)
+        bool PowerArmorHudOpen()
+        {
+            const auto* ui = RE::UI::GetSingleton();
+            return ui && ui->GetMenuOpen(kPowerArmorMenu);
+        }
+
+        bool FindRoot(const char* a_menu, GValue& a_root, std::string& a_error)
         {
             auto* ui = RE::UI::GetSingleton();
             if (!ui) {
                 a_error = "UI not available";
                 return false;
             }
-            const auto menu = ui->GetMenu(RE::HUDMenu::MENU_NAME);
+            const auto menu = ui->GetMenu(a_menu);
             if (!menu) {
-                a_error = "HUDMenu not open";
+                a_error = std::format("{} not open", a_menu);
                 return false;
             }
             a_root = menu->menuObj;
@@ -129,7 +139,7 @@ namespace OnYourOwn::Compass
                 menu->uiMovie->GetVariable(&a_root, "root");
             }
             if (!a_root.IsObject() && !a_root.IsDisplayObject()) {
-                a_error = "HUD menu has no root clip";
+                a_error = std::format("{} has no root clip", a_menu);
                 return false;
             }
             return true;
@@ -149,6 +159,15 @@ namespace OnYourOwn::Compass
             return true;
         }
 
+        bool FindPowerArmorWidget(const GValue& a_root, GValue& a_widget, std::string& a_error)
+        {
+            if (!Child(a_root, "CompassWidget_mc", a_widget)) {
+                a_error = "power armor HUD has no CompassWidget_mc (replaced HUD?)";
+                return false;
+            }
+            return true;
+        }
+
         // ---- hiding -------------------------------------------------------------
 
         // Counts for the log. `reset` = clips we hid whose alpha the game set back since the last
@@ -159,12 +178,18 @@ namespace OnYourOwn::Compass
             int floatingHidden = 0, floatingReset = 0;
         };
 
+        struct CompassState
+        {
+            bool              widgetHidden = false;
+            std::vector<bool> hidden[kHolders.size()];  // markers we hid, by holder and child index
+        };
+
         struct State
         {
             std::string       lastError;
-            bool              widgetHidden = false;
-            std::vector<bool> hidden[kHolders.size()];  // compass markers we hid, by holder and child index
-            std::vector<bool> floatingHidden;           // floating markers we hid, by child index
+            CompassState      hud;
+            CompassState      powerArmor;
+            std::vector<bool> floatingHidden;  // floating markers we hid, by child index
             std::string       lastSummary;
         };
         State g_state;
@@ -177,7 +202,10 @@ namespace OnYourOwn::Compass
                 }
                 return false;
             };
-            return g_state.widgetHidden || any(g_state.floatingHidden) || any(g_state.hidden[0]) || any(g_state.hidden[1]);
+            const auto anyCompass = [&](const CompassState& a_compass) {
+                return a_compass.widgetHidden || any(a_compass.hidden[0]) || any(a_compass.hidden[1]);
+            };
+            return any(g_state.floatingHidden) || anyCompass(g_state.hud) || anyCompass(g_state.powerArmor);
         }
 
         // Hides or restores one clip. a_wasHidden tracks whether we hid it.
@@ -219,10 +247,10 @@ namespace OnYourOwn::Compass
             }
         }
 
-        void ApplyCompassMarkers(GValue& a_widget, const CompassSettings& a_settings, bool a_active, Tally& a_tally)
+        void ApplyCompassMarkers(GValue& a_widget, CompassState& a_state, const CompassSettings& a_settings, bool a_active, Tally& a_tally)
         {
             for (std::size_t h = 0; h < kHolders.size(); ++h) {
-                auto&  hidden = g_state.hidden[h];
+                auto&  hidden = a_state.hidden[h];
                 GValue holder;
                 if (!Child(a_widget, kHolders[h], holder)) {
                     hidden.clear();
@@ -243,6 +271,20 @@ namespace OnYourOwn::Compass
                     hidden[i] = wasHidden;
                 }
             }
+        }
+
+        // Whole compass, then its markers. With it shown we only undo our own change, so iHUD keeps
+        // control.
+        void ApplyCompass(GValue& a_widget, CompassState& a_state, const CompassSettings& a_settings, bool a_active, Tally& a_tally)
+        {
+            if (a_active && !a_settings.showCompass) {
+                if (Number(a_widget, "alpha", 0.0) != 0.0) SetAlpha(a_widget, 0.0);
+                a_state.widgetHidden = true;
+            } else if (a_state.widgetHidden) {
+                SetAlpha(a_widget, 1.0);
+                a_state.widgetHidden = false;
+            }
+            ApplyCompassMarkers(a_widget, a_state, a_settings, a_active && a_settings.showCompass, a_tally);
         }
 
         void ApplyFloatingMarkers(const GValue& a_root, const CompassSettings& a_settings, bool a_active, Tally& a_tally)
@@ -360,33 +402,32 @@ namespace OnYourOwn::Compass
     void OnFrame(const Config& a_config)
     {
         const bool logging = ShouldLog(a_config.logLevel, LogCategory::Compass);
-        const bool active = a_config.enabled && !a_config.compass.AllShown();
+        const bool powerArmor = PowerArmorHudOpen();
+        const auto settings = a_config.ActiveCompass(powerArmor);
+        const bool active = a_config.enabled && !settings.AllShown();
         if (!active && !AnyHidden() && !logging) return;
 
-        GValue      root, widget;
+        // Hide flags are kept while the power armor menu is closed: its clips may come back as they were.
+        GValue      root, widget, powerArmorRoot, powerArmorWidget;
         std::string error;
-        if (!FindRoot(root, error) || !FindWidget(root, widget, error)) {
-            if (logging && error != g_state.lastError) Log::Info("compass", "compass not found: {}", error);
-            g_state.lastError = std::move(error);
-            return;
-        }
-        g_state.lastError.clear();
+        const bool  haveHud = FindRoot(RE::HUDMenu::MENU_NAME.data(), root, error) && FindWidget(root, widget, error);
+        const bool  havePowerArmor = powerArmor && FindRoot(kPowerArmorMenu, powerArmorRoot, error) && FindPowerArmorWidget(powerArmorRoot, powerArmorWidget, error);
+        if (logging && !error.empty() && error != g_state.lastError) Log::Info("compass", "compass not found: {}", error);
+        g_state.lastError = std::move(error);
+        if (!haveHud && !havePowerArmor) return;
 
-        // Whole compass. With it shown we only undo our own change, so iHUD keeps control.
-        if (active && !a_config.compass.showCompass) {
-            if (Number(widget, "alpha", 0.0) != 0.0) SetAlpha(widget, 0.0);
-            g_state.widgetHidden = true;
-        } else if (g_state.widgetHidden) {
-            SetAlpha(widget, 1.0);
-            g_state.widgetHidden = false;
-        }
-
+        // The log reports the compass on screen, so the regular one is counted only outside power armor.
         Tally tally;
-        ApplyCompassMarkers(widget, a_config.compass, active && a_config.compass.showCompass, tally);
-        ApplyFloatingMarkers(root, a_config.compass, active, tally);
+        if (haveHud) ApplyCompass(widget, g_state.hud, settings, active, tally);
+        if (havePowerArmor) {
+            tally = {};
+            ApplyCompass(powerArmorWidget, g_state.powerArmor, settings, active, tally);
+        }
+        if (haveHud) ApplyFloatingMarkers(root, settings, active, tally);
 
         if (logging) {
-            auto summary = std::format("compass {}, hidden: {}; in world hidden: {}", g_state.widgetHidden ? "hidden" : "shown",
+            const auto& shown = havePowerArmor ? g_state.powerArmor : g_state.hud;
+            auto summary = std::format("{} {}, hidden: {}; in world hidden: {}", havePowerArmor ? "power armor compass" : "compass", shown.widgetHidden ? "hidden" : "shown",
                 HiddenList({ { "quest_marker", tally.quests }, { "enemy", tally.enemies }, { "undiscovered_location", tally.undiscovered },
                     { "discovered_location", tally.discovered }, { "custom_waypoint", tally.waypoint }, { "direction", tally.directions } }),
                 HiddenList({ { "quest_marker", tally.floatingHidden } }));
@@ -394,7 +435,7 @@ namespace OnYourOwn::Compass
             if (const auto reset = tally.reset + tally.floatingReset) summary += std::format("; re-shown by the game: {}", reset);
             if (summary != g_state.lastSummary) Log::Info("compass", "{}", summary);
             g_state.lastSummary = std::move(summary);
-            LogMarkers(root, widget);
+            LogMarkers(root, havePowerArmor ? powerArmorWidget : widget);
         }
     }
 }
