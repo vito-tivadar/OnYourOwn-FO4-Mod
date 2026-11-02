@@ -43,6 +43,17 @@ namespace OnYourOwn
         LogLevel        logLevel = LogLevel::None;
         Settings        markers{};
         CompassSettings compass{};
+        bool            powerArmorCustomCompass = false;  // false = power armor uses `compass`
+        CompassSettings powerArmorCompass{};
+
+        // HUD settings in effect. Floating quest markers have one option, outside the compass ones.
+        [[nodiscard]] CompassSettings ActiveCompass(bool a_inPowerArmor) const noexcept
+        {
+            if (!a_inPowerArmor || !powerArmorCustomCompass) return compass;
+            auto settings = powerArmorCompass;
+            settings.showFloatingQuests = compass.showFloatingQuests;
+            return settings;
+        }
 
         bool operator==(const Config&) const = default;
     };

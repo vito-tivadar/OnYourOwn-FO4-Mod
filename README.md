@@ -21,6 +21,7 @@ It never edits saves, discovery, quests or fast travel, and it replaces no game 
 - Compass: hide the whole compass, or only quest markers, enemies, undiscovered or discovered
   locations, the custom waypoint or the N/E/S/W letters.
 - Floating quest markers over targets in the world can be turned off on their own.
+- Power armor has its own compass: use the same options or a separate custom set.
 - With every HUD option on, the HUD is left completely alone.
 
 ## Requirements

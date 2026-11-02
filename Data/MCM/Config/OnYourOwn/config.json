@@ -270,6 +270,94 @@
           "valueOptions": {
             "sourceType": "ModSettingBool"
           }
+        },
+        {
+          "text": "Power armor compass",
+          "type": "section"
+        },
+        {
+          "id": "iCompass:PowerArmor",
+          "text": "Compass in power armor",
+          "type": "dropdown",
+          "help": "Power armor has its own compass. Same as compass uses the options above; Custom shows a separate set of options that apply while you wear it.",
+          "groupControl": 1,
+          "valueOptions": {
+            "sourceType": "ModSettingInt",
+            "options": [
+              "Same as compass",
+              "Custom"
+            ]
+          }
+        },
+        {
+          "id": "bShowCompass:PowerArmor",
+          "text": "Show compass",
+          "type": "switcher",
+          "help": "Off hides the whole compass bar while in power armor.",
+          "groupCondition": 1,
+          "valueOptions": {
+            "sourceType": "ModSettingBool"
+          }
+        },
+        {
+          "id": "bShowQuests:PowerArmor",
+          "text": "Quest markers",
+          "type": "switcher",
+          "help": "Quest objectives and quest doors on the compass.",
+          "groupCondition": 1,
+          "valueOptions": {
+            "sourceType": "ModSettingBool"
+          }
+        },
+        {
+          "id": "bShowEnemies:PowerArmor",
+          "text": "Enemies (red dots)",
+          "type": "switcher",
+          "help": "Hostile markers on the compass and over enemies in the world.",
+          "groupCondition": 1,
+          "valueOptions": {
+            "sourceType": "ModSettingBool"
+          }
+        },
+        {
+          "id": "bShowUndiscovered:PowerArmor",
+          "text": "Undiscovered locations",
+          "type": "switcher",
+          "help": "Nearby locations you have not discovered yet.",
+          "groupCondition": 1,
+          "valueOptions": {
+            "sourceType": "ModSettingBool"
+          }
+        },
+        {
+          "id": "bShowDiscovered:PowerArmor",
+          "text": "Discovered locations",
+          "type": "switcher",
+          "help": "Locations you have discovered.",
+          "groupCondition": 1,
+          "valueOptions": {
+            "sourceType": "ModSettingBool"
+          }
+        },
+        {
+          "id": "bShowCustomWaypoint:PowerArmor",
+          "text": "Custom waypoint",
+          "type": "switcher",
+          "help": "The waypoint you place on the map, on the compass and floating in the world.",
+          "groupCondition": 1,
+          "valueOptions": {
+            "sourceType": "ModSettingBool"
+          }
+        },
+        {
+          "id": "bShowDirections:PowerArmor",
+          "text": "Directions (N, E, S, W)",
+          "type": "switcher",
+          "help": "The cardinal direction letters.",
+          "groupCondition": 1,
+          "valueOptions": {
+            "sourceType": "ModSettingBool"
+          }
         }
       ]
     }
